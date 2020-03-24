@@ -1,0 +1,5 @@
+config
+node_modules
+package-lock.json
+how-to-use.txt
+scripts
