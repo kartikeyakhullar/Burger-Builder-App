@@ -10,7 +10,7 @@ import withErrorHandler from "../hoc/withErrorHandler"
 import { connect } from "react-redux";
 import * as actions from "../store/burgerBuilder"
 import * as actions_2 from "../store/orderActions"
-
+import * as actions_3 from "../store/auth"
 
 
 
@@ -39,8 +39,14 @@ class BurgerBuilder extends Component {
     }
     
     purchaseHandler = ()=>{
-        console.log("Button clicked!!");
-        this.setState({purchasing:true});
+        if(this.props.isAuthenticated){
+            console.log("Button clicked!!");
+            this.setState({purchasing:true});
+        }else {
+            this.props.onSetAuthRedirectPath('/checkout');
+            this.props.history.push('/auth');
+        }
+        
     }
 
     purchaseCancelHandler = ()=>{
@@ -73,6 +79,7 @@ class BurgerBuilder extends Component {
         let burger = this.props.error ? <p>Ingredients can't be loaded!!</p>:<Spinner />
 
         if(this.props.ings){
+            console.log("This was hit!!");
             burger = (
                 <Aux>
                     <Burger ingredients = {this.props.ings}/>
@@ -82,6 +89,7 @@ class BurgerBuilder extends Component {
                         disabled = {disabledInfo}
                         price = {this.props.price}
                         ordered = {this.purchaseHandler}
+                        isAuth = {this.props.isAuthenticated}
                         purchasable = {this.updatePurchaseState(this.props.ings)}
                     />
                 </Aux>
@@ -114,7 +122,8 @@ const mapStateToProps = state =>{
     return {
         ings : state.burgerBuilder.ingredients,
         price : state.burgerBuilder.totalPrice,
-        error : state.burgerBuilder.error
+        error : state.burgerBuilder.error,
+        isAuthenticated : state.auth.token !== null
     }
 }
 
@@ -124,7 +133,8 @@ const mapDispatchToProps = dispatch =>{
         onIngredientAdded : (ingName)=>dispatch(actions.addIngredient(ingName)),
         onIngredientRemoved : (ingName)=>dispatch(actions.removeIngredient(ingName)),
         onInitingredients : ()=>dispatch(actions.initIngredients()),
-        onInitpurchase : ()=>dispatch(actions_2.purchaseInit())
+        onInitpurchase : ()=>dispatch(actions_2.purchaseInit()),
+        onSetAuthRedirectPath : (path)=>dispatch(actions_3.setAuthRedirectPath(path))
         
     }
 }
